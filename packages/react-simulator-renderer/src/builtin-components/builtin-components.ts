@@ -1,4 +1,4 @@
-import { ReactElement, createElement, ReactType } from 'react';
+import { ReactElement, createElement, ElementType } from 'react';
 import classNames from 'classnames';
 
 const supportedEvents = [
@@ -212,7 +212,7 @@ const HTMLBlock = [
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const HTMLInlineBlock = ['a', 'b', 'span', 'em'];
-export function getIntrinsicMock(tag: string): ReactType {
+export function getIntrinsicMock(tag: string): ElementType {
   if (HTMLBlock.indexOf(tag) > -1) {
     return getBlockElement(tag);
   }

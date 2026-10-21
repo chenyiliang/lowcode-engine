@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import ReactDOM from 'react-dom';
+import { createPortal } from 'react-dom';
 import { TipItem } from './tip-item';
 import { tipHandler } from './tip-handler';
 
@@ -19,14 +19,18 @@ export class TipContainer extends Component {
     };
   }
 
-  UNSAFE_componentWillMount() {
+  // React 19 移除了 UNSAFE_componentWillMount。
+  // 原本这里想在挂载前清理监听，但 dispose 只在 componentDidMount 里赋值，
+  // 挂载前恒为 undefined，是个空操作；真正的清理应发生在卸载时，故改为 componentWillUnmount。
+  componentWillUnmount() {
     if (this.dispose) {
       this.dispose();
+      this.dispose = undefined;
     }
   }
 
   render() {
-    return ReactDOM.createPortal(
+    return createPortal(
       <div className="lc-tips-container">
         <TipItem />
       </div>,

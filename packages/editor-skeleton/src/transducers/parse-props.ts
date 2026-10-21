@@ -10,11 +10,15 @@ import {
   IPublicTypeOneOfType,
   ConfigureSupportEvent,
   IPublicModelSettingField,
+  IPublicTypeTitleConfig,
 } from '@alilc/lowcode-types';
 
 function propConfigToFieldConfig(propConfig: IPublicTypePropConfig): IPublicTypeFieldConfig {
   const { name, description } = propConfig;
-  const title = {
+  // 必须显式标注成 IPublicTypeTitleConfig：否则 label 里的 type: 'i18n' 会被拓宽成 string，
+  // 整个对象就再也匹配不上 IPublicTypeI18nData（它要求 type 是字面量 'i18n'），
+  // 赋给 title（IPublicTypeTitleContent）时会报 TS2322。
+  const title: IPublicTypeTitleConfig = {
     label: {
       type: 'i18n',
       'en-US': name,

@@ -20,6 +20,12 @@ interface IGeneralComponent<P = {}, S = {}, SS = any> extends ComponentLifecycle
   render(): any;
 }
 
+/**
+ * 「鸭子类型」的组件构造器，同时兼容 react 与 rax。
+ * 构造签名保留泛型形式：adapter 里的运行时基类是 `class <T = any, S = any>` 这样的泛型类，
+ * 子类会向其传类型实参（如 `extends PureComponent<IVisualDomProps>`），
+ * 因此基类的构造签名必须能接受类型参数，不能收窄成非泛型形式。
+ */
 export type IGeneralConstructor<
   T = {
     [key: string]: any;

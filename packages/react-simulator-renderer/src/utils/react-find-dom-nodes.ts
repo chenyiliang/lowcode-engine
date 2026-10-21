@@ -1,5 +1,4 @@
 import { ReactInstance } from 'react';
-import { findDOMNode } from 'react-dom';
 import { isElement } from '@alilc/lowcode-utils';
 import { isDOMNode } from './is-dom-node';
 
@@ -22,6 +21,11 @@ function elementsFromFiber(fiber: any, elements: Array<Element | Text>) {
   }
 }
 
+/**
+ * React 19 移除了 ReactDOM.findDOMNode，这里改为完全依赖 fiber 树遍历来取 DOM 节点。
+ * 原本 fiber 遍历就是主路径，findDOMNode 只是兜底；去掉兜底后，
+ * 遍历不到 DOM 节点时返回 null，由调用方（host.getRects / findDOMNodes）处理。
+ */
 export function reactFindDOMNodes(elem: ReactInstance | null): Array<Element | Text> | null {
   if (!elem) {
     return null;
@@ -31,11 +35,13 @@ export function reactFindDOMNodes(elem: ReactInstance | null): Array<Element | T
   }
   const elements: Array<Element | Text> = [];
   const fiberNode = getReactInternalFiber(elem);
-  elementsFromFiber(fiberNode?.child, elements);
-  if (elements.length > 0) return elements;
-  try {
-    return [findDOMNode(elem)];
-  } catch (e) {
-    return null;
+  // 组件实例本身可能直接挂着 DOM（stateNode），先从当前 fiber 找，再深入子树
+  if (fiberNode) {
+    if (fiberNode.stateNode && isDOMNode(fiberNode.stateNode)) {
+      elements.push(fiberNode.stateNode);
+    } else {
+      elementsFromFiber(fiberNode.child, elements);
+    }
   }
+  return elements.length > 0 ? elements : null;
 }

@@ -1,5 +1,6 @@
-import { ReactInstance, Fragment, Component, createElement } from 'react';
-import { Router, Route, Switch } from 'react-router';
+import { ReactInstance, Fragment, Component, createElement, ReactNode } from 'react';
+// React Router v7：Router(history) 换成 unstable_HistoryRouter，Switch/Route(render) 换成 Routes/Route(element)
+import { unstable_HistoryRouter as HistoryRouter, Routes as RouterRoutes, Route } from 'react-router';
 import cn from 'classnames';
 import { Node } from '@alilc/lowcode-designer';
 import LowCodeRenderer from '@alilc/lowcode-react-renderer';
@@ -50,11 +51,11 @@ export default class SimulatorRendererView extends Component<{ rendererContainer
   render() {
     const { rendererContainer } = this.props;
     return (
-      <Router history={rendererContainer.history}>
+      <HistoryRouter history={rendererContainer.history}>
         <Layout rendererContainer={rendererContainer}>
           <Routes rendererContainer={rendererContainer} />
         </Layout>
-      </Router>
+      </HistoryRouter>
     );
   }
 }
@@ -63,18 +64,20 @@ export default class SimulatorRendererView extends Component<{ rendererContainer
 export class Routes extends Component<{ rendererContainer: SimulatorRendererContainer }> {
   render() {
     const { rendererContainer } = this.props;
+    // React Router v7：<Switch> → <Routes>，<Route render={...}> → <Route element={...}>。
+    // Renderer 组件并不消费 match/location/history 等 route props，这里直接渲染即可。
     return (
-      <Switch>
+      <RouterRoutes>
         {rendererContainer.documentInstances.map((instance) => {
           return (
             <Route
               path={instance.path}
               key={instance.id}
-              render={(routeProps) => <Renderer documentInstance={instance} rendererContainer={rendererContainer} {...routeProps} />}
+              element={<Renderer documentInstance={instance} rendererContainer={rendererContainer} />}
             />
           );
         })}
-      </Switch>
+      </RouterRoutes>
     );
   }
 }
@@ -99,7 +102,7 @@ function getDeviceView(view: any, device: string, mode: string) {
 }
 
 @observer
-class Layout extends Component<{ rendererContainer: SimulatorRendererContainer }> {
+class Layout extends Component<{ rendererContainer: SimulatorRendererContainer; children?: ReactNode }> {
   render() {
     const { rendererContainer, children } = this.props;
     const { layout } = rendererContainer;

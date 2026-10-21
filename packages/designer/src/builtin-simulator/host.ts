@@ -352,18 +352,20 @@ export class BuiltinSimulatorHost implements ISimulatorHost<BuiltinSimulatorProp
    */
   connect(
     renderer: BuiltinSimulatorRenderer,
-    effect: (reaction: IReactionPublic) => void, options?: IReactionOptions,
+    effect: (reaction: IReactionPublic) => void, options?: IReactionOptions<unknown, boolean>,
   ) {
     this._renderer = renderer;
     return autorun(effect, options);
   }
 
+  // mobx 6.16 起 IReactionOptions 变为泛型 <T, FireImmediately>；
+  // 这里的包装方法本身用 unknown 表示取值类型，故按 <unknown, boolean> 实例化，签名语义不变。
   reaction(expression: (reaction: IReactionPublic) => unknown, effect: (value: unknown, prev: unknown, reaction: IReactionPublic) => void,
-    opts?: IReactionOptions | undefined): IReactionDisposer {
+    opts?: IReactionOptions<unknown, boolean> | undefined): IReactionDisposer {
     return reaction(expression, effect, opts);
   }
 
-  autorun(effect: (reaction: IReactionPublic) => void, options?: IReactionOptions): IReactionDisposer {
+  autorun(effect: (reaction: IReactionPublic) => void, options?: IReactionOptions<unknown, boolean>): IReactionDisposer {
     return autorun(effect, options);
   }
 

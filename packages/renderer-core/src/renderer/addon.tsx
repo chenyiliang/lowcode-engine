@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import baseRendererFactory from './base';
 import { isEmpty } from '../utils';
 import { IRendererAppHelper, IBaseRendererProps, IBaseRenderComponent } from '../types';
@@ -11,11 +10,7 @@ export default function addonRendererFactory(): IBaseRenderComponent {
 
     __namespace = 'addon';
 
-    static propTypes = {
-      config: PropTypes.object,
-      __schema: PropTypes.object,
-    };
-
+    // React 19 不再支持 propTypes；config / __schema 已由 IBaseRendererProps 描述
     static defaultProps = {
       config: {},
       __schema: {},

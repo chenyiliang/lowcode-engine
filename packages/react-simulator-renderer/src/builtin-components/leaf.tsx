@@ -1,6 +1,6 @@
-import { Component } from 'react';
+import { Component, ReactNode } from 'react';
 
-class Leaf extends Component {
+class Leaf extends Component<{ children?: ReactNode }> {
   static displayName = 'Leaf';
 
   static componentMetadata = {

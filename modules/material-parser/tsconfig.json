@@ -1,19 +1,17 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    // Enable strictest settings like strictNullChecks & noImplicitAny.
+    // material-parser 是 Node 库：只需 ES2022 + Node 内置类型，不需要 DOM
+    "lib": ["ES2022"],
+    "types": ["node"],
+    // 该包大量使用 react-docgen / ast-types 的 CJS 深层内部路径，无类型声明；
+    // 与迁移前保持一致（原 tsconfig 就是 strict:false + allowJs）
     "strict": false,
-    // Allow json import
-    "resolveJsonModule": true,
-    // skip type checking of declaration files
-    "skipLibCheck": true,
-    "baseUrl": "./packages",
     "allowJs": true,
-    "outDir": "lib",
-    "lib": ["es2018"],
-    "module": "commonjs",
-    "target": "es2018"
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false
   },
-  "exclude": ["**/test", "**/lib", "**/dist", "**/es", "node_modules", "schemas"],
-  "include": ["src/**/*"]
+  "include": ["src"],
+  "exclude": ["**/test", "**/lib", "**/dist", "**/es", "node_modules", "schemas"]
 }

@@ -33,3 +33,4 @@ export * from './check-types';
 export * from './workspace';
 export * from './context-menu';
 export { checkPropTypes } from './check-prop-types';
+export { findDOMNode, getReactInternalFiber } from './find-dom-node';

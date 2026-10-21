@@ -1,10 +1,16 @@
-import fetch from 'node-fetch';
 import type { IPublicTypeProjectSchema, ResultDir } from '@alilc/lowcode-types';
 import type { FlattenFile } from './types/file';
 
 declare const Worker: any;
 declare const self: any;
 declare const __PACKAGE_VERSION__: string;
+
+// 用运行时全局 fetch，不要 import 'node-fetch'。
+// 本模块是**浏览器**入口（下面用了 Worker / self / Blob / URL.createObjectURL），
+// 消费方 lowcode-code-generator-demo 会以 ESM 方式把它打进前端 bundle。
+// 原来的 `import fetch from 'node-fetch'` 会把 Node 依赖拖进浏览器产物
+// （实测 demo 构建日志出现大量 node:assert / node:path externalized 警告）。
+// 浏览器有原生 fetch；Node 18+（本包 vite target 就是 node18）也有全局 fetch，两端都不需要 polyfill。
 
 const packageVersion = __PACKAGE_VERSION__ || 'latest';
 

@@ -2,8 +2,7 @@ import {
   INode,
   ISettingField,
 } from '@alilc/lowcode-designer';
-import { IShellModelFactory, IPublicModelNode } from '@alilc/lowcode-types';
-import { IPublicModelSettingField } from '../../../types/src/shell/model/setting-field';
+import { IShellModelFactory, IPublicModelNode, IPublicModelSettingField } from '@alilc/lowcode-types';
 import {
   Node,
   SettingField,

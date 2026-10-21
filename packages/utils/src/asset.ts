@@ -65,26 +65,29 @@ export function mergeAssets(assets: IPublicTypeAssetsJson, incrementalAssets: IP
   return assets;
 }
 
-function mergeAssetsComponentList(assets: IPublicTypeAssetsJson, incrementalAssets: IPublicTypeAssetsJson, listName: keyof IPublicTypeAssetsJson): void {
-  if (incrementalAssets[listName]) {
-    if (assets[listName]) {
-      // 根据title进行合并
-      incrementalAssets[listName]?.map((item) => {
-        let matchFlag = false;
-        assets[listName]?.map((assetItem) => {
-          if (assetItem.title === item.title) {
-            assetItem.children = assetItem.children.concat(item.children);
-            matchFlag = true;
-          }
+// 这两个字段都是物料面板的「组件分类列表」（已废弃，仅做向下兼容合并）
+type ComponentListName = 'componentList' | 'bizComponentList';
 
-          return assetItem;
-        });
-
-        !matchFlag && assets[listName]?.push(item);
-        return item;
-      });
-    }
+function mergeAssetsComponentList(assets: IPublicTypeAssetsJson, incrementalAssets: IPublicTypeAssetsJson, listName: ComponentListName): void {
+  const incrementList = incrementalAssets[listName];
+  const assetList = assets[listName];
+  if (!incrementList || !assetList) {
+    return;
   }
+  // 根据title进行合并
+  incrementList.forEach((item) => {
+    let matchFlag = false;
+    assetList.forEach((assetItem) => {
+      if (assetItem.title === item.title) {
+        assetItem.children = (assetItem.children || []).concat(item.children || []);
+        matchFlag = true;
+      }
+    });
+
+    if (!matchFlag) {
+      assetList.push(item);
+    }
+  });
 }
 
 export class StylePoint {

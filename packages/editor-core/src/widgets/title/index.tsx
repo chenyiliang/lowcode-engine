@@ -1,10 +1,24 @@
 import { Component, isValidElement, ReactNode } from 'react';
 import classNames from 'classnames';
 import { createIcon, isI18nData, isTitleConfig } from '@alilc/lowcode-utils';
-import { IPublicTypeI18nData, IPublicTypeTitleConfig, IPublicTypeTitleProps } from '@alilc/lowcode-types';
+import { IPublicTypeI18nData, IPublicTypeTitleConfig, IPublicTypeTipConfig, IPublicTypeTitleProps, TipContent } from '@alilc/lowcode-types';
 import { intl } from '../../intl';
 import { Tip } from '../tip';
 import './title.less';
+
+/**
+ * 判断 tip 是否是一份「Tip 配置对象」（可直接当 Tip 的 props 用），
+ * 而不是需要包成 children 的文本 / 元素。
+ */
+function isTipConfig(tip: TipContent): tip is IPublicTypeTipConfig {
+  return (
+    typeof tip === 'object' &&
+    tip !== null &&
+    !Array.isArray(tip) &&
+    !isValidElement(tip) &&
+    !isI18nData(tip)
+  );
+}
 
 /**
  * 根据 keywords 将 label 分割成文字片段
@@ -61,6 +75,7 @@ export class Title extends Component<IPublicTypeTitleProps> {
       return null;
     }
 
+    // intl 内部只处理 i18n 数据，其它 ReactNode 会原样返回
     const intlLabel = intl(label);
 
     if (typeof intlLabel !== 'string') {
@@ -107,10 +122,8 @@ export class Title extends Component<IPublicTypeTitleProps> {
       if (isValidElement(_title.tip) && _title.tip.type === Tip) {
         tip = _title.tip;
       } else {
-        const tipProps =
-          typeof _title.tip === 'object' && !(isValidElement(_title.tip) || isI18nData(_title.tip))
-            ? _title.tip
-            : { children: _title.tip };
+        // tip 既可能是一份 Tip 配置对象（直接当 props 用），也可能是文本 / 元素（包成 children）
+        const tipProps = isTipConfig(_title.tip) ? _title.tip : { children: _title.tip };
         tip = <Tip {...tipProps} />;
       }
     }

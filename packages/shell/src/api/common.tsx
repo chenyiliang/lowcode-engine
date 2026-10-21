@@ -14,6 +14,7 @@ import {
   isSettingField as innerIsSettingField,
 } from '@alilc/lowcode-utils';
 import {
+  IPublicTypeCustomView,
   IPublicTypeNodeSchema,
   IPublicEnumTransitionType,
   IPublicEnumTransformStage as InnerTransitionStage,
@@ -197,21 +198,36 @@ class SkeletonCabin implements IPublicApiCommonSkeletonCabin {
   /**
    * @deprecated
    */
-  createSettingFieldView(field: IPublicModelSettingField, fieldEntry: any) {
-    return innerCreateSettingFieldView((field as any)[settingFieldSymbol] || field, fieldEntry);
+  // 第三个参数 index 是 editor-skeleton 真实签名的一部分（可选），它被用作
+  // 自定义视图字段的 React key：`createContent(field, { key: index, field: fieldEntry })`。
+  // 原来这里只声明并转发了 2 个参数，导致下游传 index 时报 TS2554，
+  // 且自定义视图 setter 渲染时丢失列表 key（React 协调可能出错）。现按真实签名转发。
+  // field 参数与 editor-skeleton 的真实签名对齐（ISettingField | IPublicTypeCustomView）：
+  // items 里既可能是 SettingField，也可能是自定义视图组件；原来只声明 IPublicModelSettingField
+  // 会让下游（engine-ext object-setter 传 union）报 TS2345。
+  createSettingFieldView(
+    field: IPublicModelSettingField | IPublicTypeCustomView,
+    fieldEntry: any,
+    index?: number,
+  ) {
+    return innerCreateSettingFieldView(
+      (field as any)[settingFieldSymbol] || field,
+      fieldEntry,
+      index,
+    );
   }
 
   /**
    * @deprecated
    */
-  get PopupContext(): any {
+  get PopupContext(): typeof InnerPopupContext {
     return InnerPopupContext;
   }
 
   /**
    * @deprecated
    */
-   get PopupPipe(): any {
+   get PopupPipe(): typeof InnerPopupPipe {
     return InnerPopupPipe;
   }
 }
@@ -418,7 +434,11 @@ class EditorCabin implements IPublicApiCommonEditorCabin {
 
 export class Common implements IPublicApiCommon {
   private readonly __designerCabin: any;
-  private readonly __skeletonCabin: any;
+  // 用真实类型而非 any：IPublicApiCommonSkeletonCabin 只声明了 Workbench，
+  // 但 SkeletonCabin 实际还提供 PopupContext / PopupPipe / createSettingFieldView 等成员，
+  // 下游（engine-ext 的 setter）会解构使用它们。写成 any 会让
+  // `React.ContextType<typeof PopupContext>` 退化成 unknown，下游报 TS2571。
+  private readonly __skeletonCabin: SkeletonCabin;
   private readonly __editorCabin: any;
   private readonly __utils: Utils;
 
@@ -451,7 +471,7 @@ export class Common implements IPublicApiCommon {
     return this.__designerCabin;
   }
 
-  get skeletonCabin(): any {
+  get skeletonCabin(): SkeletonCabin {
     return this.__skeletonCabin;
   }
 

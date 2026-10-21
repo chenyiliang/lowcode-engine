@@ -2,7 +2,9 @@ import { IPublicTypeRootSchema, IPublicTypeDragNodeDataObject, IPublicTypeDragNo
 import { IPublicEnumTransformStage } from '../enum';
 import { IPublicApiProject } from '../api';
 import { IPublicModelDropLocation, IPublicModelDetecting, IPublicModelNode, IPublicModelSelection, IPublicModelHistory, IPublicModelModalNodesManager } from './';
-import { IPublicTypeNodeData, IPublicTypeNodeSchema, IPublicTypeOnChangeOptions } from '@alilc/lowcode-types';
+import { IPublicTypeNodeData } from '../type/node-data';
+import { IPublicTypeNodeSchema } from '../type/node-schema';
+import { IPublicTypeOnChangeOptions } from '../type/on-change-options';
 
 export interface IPublicModelDocumentModel<
   Selection = IPublicModelSelection,

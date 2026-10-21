@@ -1,14 +1,32 @@
 import { Menu, Icon } from '@alifd/next';
 import { IPublicEnumContextMenuType, IPublicModelNode, IPublicModelPluginContext, IPublicTypeContextMenuAction, IPublicTypeContextMenuItem } from '@alilc/lowcode-types';
-import { Logger } from '@alilc/lowcode-utils';
+import { Logger } from './logger';
 import classNames from 'classnames';
-import React from 'react';
+import React, { isValidElement } from 'react';
 import './context-menu.scss';
 
 const logger = new Logger({ level: 'warn', bizName: 'utils' });
 const { Item, Divider, PopupItem } = Menu;
 
 const MAX_LEVEL = 2;
+
+/**
+ * 标题既可能是纯文本 / i18n 数据，也可能已经是 React 元素。
+ * intl() 只接受 string | i18n 数据，因此这里对元素直接原样渲染，
+ * 其余交给 intl 做国际化处理。
+ */
+function renderTitle(
+  intl: ((data: any, params?: object) => string) | undefined,
+  title: string | object | React.ReactElement | undefined,
+): React.ReactNode {
+  if (title == null) {
+    return title as React.ReactNode;
+  }
+  if (isValidElement(title)) {
+    return title;
+  }
+  return intl ? intl(title) : (title as React.ReactNode);
+}
 
 interface IOptions {
   nodes?: IPublicModelNode[] | null;
@@ -50,7 +68,7 @@ const Tree = (props: {
         style={style}
       >
         {props.options.nodes?.[0].id === node.id ? (<Icon className="engine-context-menu-tree-selecte-icon" size="small" type="success" />) : null}
-        {intl(node.title)}
+        {renderTitle(intl, node.title)}
       </div>
       <div
         className="engine-context-menu-tree-children"
@@ -83,7 +101,7 @@ export function parseContextMenuAsReactNode(menus: IPublicTypeContextMenuItem[],
               disabled: menu.disabled,
             })}
             key={menu.name}
-            label={<div className="engine-context-menu-text">{intl(menu.title)}</div>}
+            label={<div className="engine-context-menu-text">{renderTitle(intl, menu.title)}</div>}
           >
             <Menu className="next-context engine-context-menu">
               { parseContextMenuAsReactNode(menu.items, options) }

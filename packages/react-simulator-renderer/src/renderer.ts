@@ -1,5 +1,5 @@
 import React, { createElement, ReactInstance } from 'react';
-import { render as reactRender } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { host } from './host';
 import SimulatorRendererView from './renderer-view';
 import { computed, observable as obx, untracked, makeObservable, configure } from 'mobx';
@@ -21,7 +21,12 @@ import { IPublicTypeComponentSchema, IPublicEnumTransformStage, IPublicTypeNodeI
 // just use types
 import { BuiltinSimulatorRenderer, Component, IDocumentModel, INode } from '@alilc/lowcode-designer';
 import LowCodeRenderer from '@alilc/lowcode-react-renderer';
-import { createMemoryHistory, MemoryHistory } from 'history';
+import { UNSAFE_createMemoryHistory as createMemoryHistory } from 'react-router';
+
+// react-router v7 自带 history 实现（不再从 `history` 包引入）：
+// unstable_HistoryRouter 需要的是 v7 内部的 History 类型（含 createURL/encodeLocation），
+// 因此这里直接用 v7 导出的工厂，类型也从它推导，避免两套 History 类型不兼容。
+type MemoryHistory = ReturnType<typeof createMemoryHistory>;
 import Slot from './builtin-components/slot';
 import Leaf from './builtin-components/leaf';
 import { withQueryParams, parseQuery } from './utils/url';
@@ -188,6 +193,23 @@ export class SimulatorRendererContainer implements BuiltinSimulatorRenderer {
   private disposeFunctions: Array<() => void> = [];
   readonly history: MemoryHistory;
 
+  // React 19：用 createRoot 取代 ReactDOM.render，需要持有 root 以便 rerender / unmount
+  private _root: Root | null = null;
+  private _rootContainer: HTMLElement | null = null;
+
+  /** 取（或惰性创建）当前容器对应的 React 19 root */
+  private getRoot(container: HTMLElement): Root {
+    if (!this._root || this._rootContainer !== container) {
+      if (this._root) {
+        this._root.unmount();
+        this._root = null;
+      }
+      this._root = createRoot(container);
+      this._rootContainer = container;
+    }
+    return this._root;
+  }
+
   @obx.ref private _documentInstances: DocumentInstance[] = [];
   private _requestHandlersMap: any;
   get documentInstances() {
@@ -301,7 +323,8 @@ export class SimulatorRendererContainer implements BuiltinSimulatorRenderer {
       initialEntries: [initialEntry],
     });
     this.history = history;
-    history.listen((location) => {
+    // history v5：listen 回调参数从 (location, action) 变为 ({ action, location })
+    history.listen(({ location }) => {
       const docId = location.pathname.slice(1);
       docId && host.project.open(docId);
     });
@@ -505,7 +528,7 @@ export class SimulatorRendererContainer implements BuiltinSimulatorRenderer {
     document.documentElement.classList.add('engine-page');
     document.body.classList.add('engine-document'); // important! Stylesheet.invoke depends
 
-    reactRender(createElement(SimulatorRendererView, { rendererContainer: this }), container);
+    this.getRoot(container).render(createElement(SimulatorRendererView, { rendererContainer: this }));
     host.project.setRendererReady(this);
   }
 
@@ -529,6 +552,12 @@ export class SimulatorRendererContainer implements BuiltinSimulatorRenderer {
   dispose() {
     this.disposeFunctions.forEach((fn) => fn());
     this.documentInstances.forEach((docInst) => docInst.dispose());
+    // React 19：卸载 root（等价于旧的 ReactDOM.unmountComponentAtNode）
+    if (this._root) {
+      this._root.unmount();
+      this._root = null;
+      this._rootContainer = null;
+    }
     untracked(() => {
       this._componentsMap = {};
       this._components = null;

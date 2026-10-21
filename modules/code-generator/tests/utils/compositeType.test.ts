@@ -75,66 +75,66 @@ const { marco: testMarco, start: startMarco } = marcoFactory();
 
 testMarco('""', (expression) => {
   expect(expression).toMatchInlineSnapshot(`
-    "{\\"globalConfig\\": {},
-    \\"online\\": [{\\"description\\": \\"表格（CnTable）的数据源\\",
-    \\"initialData\\": \\"\\",
-    \\"somethingelse\\": \\"somethingelse\\"}]}"
+    "{"globalConfig": {},
+    "online": [{"description": "表格（CnTable）的数据源",
+    "initialData": "",
+    "somethingelse": "somethingelse"}]}"
   `);
 });
 
 testMarco('"hello world"', (expression) => {
   expect(expression).toMatchInlineSnapshot(`
-    "{\\"globalConfig\\": {},
-    \\"online\\": [{\\"description\\": \\"表格（CnTable）的数据源\\",
-    \\"initialData\\": \\"hello world\\",
-    \\"somethingelse\\": \\"somethingelse\\"}]}"
+    "{"globalConfig": {},
+    "online": [{"description": "表格（CnTable）的数据源",
+    "initialData": "hello world",
+    "somethingelse": "somethingelse"}]}"
   `);
 });
 
 testMarco('true', (expression) => {
   expect(expression).toMatchInlineSnapshot(`
-    "{\\"globalConfig\\": {},
-    \\"online\\": [{\\"description\\": \\"表格（CnTable）的数据源\\",
-    \\"initialData\\": true,
-    \\"somethingelse\\": \\"somethingelse\\"}]}"
+    "{"globalConfig": {},
+    "online": [{"description": "表格（CnTable）的数据源",
+    "initialData": true,
+    "somethingelse": "somethingelse"}]}"
   `);
 });
 
 testMarco('{"name": "cone"}', (expression) => {
   expect(expression).toMatchInlineSnapshot(`
-    "{\\"globalConfig\\": {},
-    \\"online\\": [{\\"description\\": \\"表格（CnTable）的数据源\\",
-    \\"initialData\\": {
-      \\"name\\": \\"cone\\"
+    "{"globalConfig": {},
+    "online": [{"description": "表格（CnTable）的数据源",
+    "initialData": {
+      "name": "cone"
     },
-    \\"somethingelse\\": \\"somethingelse\\"}]}"
+    "somethingelse": "somethingelse"}]}"
   `);
 });
 
 testMarco('', (expression) => {
   expect(expression).toMatchInlineSnapshot(`
-    "{\\"globalConfig\\": {},
-    \\"online\\": [{\\"description\\": \\"表格（CnTable）的数据源\\",
-    \\"initialData\\": undefined,
-    \\"somethingelse\\": \\"somethingelse\\"}]}"
+    "{"globalConfig": {},
+    "online": [{"description": "表格（CnTable）的数据源",
+    "initialData": undefined,
+    "somethingelse": "somethingelse"}]}"
   `);
 });
 
 testMarco('undefined', (expression) => {
   expect(expression).toMatchInlineSnapshot(`
-    "{\\"globalConfig\\": {},
-    \\"online\\": [{\\"description\\": \\"表格（CnTable）的数据源\\",
-    \\"initialData\\": undefined,
-    \\"somethingelse\\": \\"somethingelse\\"}]}"
+    "{"globalConfig": {},
+    "online": [{"description": "表格（CnTable）的数据源",
+    "initialData": undefined,
+    "somethingelse": "somethingelse"}]}"
   `);
 });
 
 testMarco('null', (expression) => {
   expect(expression).toMatchInlineSnapshot(`
-    "{\\"globalConfig\\": {},
-    \\"online\\": [{\\"description\\": \\"表格（CnTable）的数据源\\",
-    \\"initialData\\": null,
-    \\"somethingelse\\": \\"somethingelse\\"}]}"
+    "{"globalConfig": {},
+    "online": [{"description": "表格（CnTable）的数据源",
+    "initialData": null,
+    "somethingelse": "somethingelse"}]}"
   `);
 });
 

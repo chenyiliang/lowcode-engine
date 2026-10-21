@@ -1,6 +1,7 @@
 // @todo 改成 hooks
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import { intl } from '@alilc/lowcode-editor-core';
 import { IconArrow } from '../../icons/arrow';
 import { IconExit } from '../../icons/exit';
 import { Stage as StageWidget } from '../../widget/stage';
@@ -58,7 +59,10 @@ export default class Stage extends Component<StageProps> {
     const { stage, current, direction } = this.props;
     const content = stage?.getContent();
     const { title } = stage!;
-    const newTitle = isTitleConfig(title) ? title.label : title;
+    // title 可能是 i18n 数据（IPublicTypeI18nData），它本身不是合法的 ReactNode，
+    // 直接渲染会报 TS2322。用 intl() 归一化：i18n 数据会被翻译成文本，
+    // 其余（字符串 / React 元素等）原样返回，结果是可渲染的 ReactNode。
+    const newTitle = intl(isTitleConfig(title) ? title.label : title);
 
     if (current) {
       if (direction) {

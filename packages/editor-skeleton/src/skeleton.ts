@@ -58,6 +58,12 @@ export interface ISkeleton extends Omit<IPublicApiSkeleton,
   'onHideWidget' |
   'remove' |
   'hideArea' |
+  // 下面这三个是 shell 层 API：shell 的 Skeleton 直接用 editor.eventBus + area.container.items
+  // 实现（见 packages/shell/src/api/skeleton.ts），内部 Skeleton 并不需要也没有实现它们，
+  // 与上面 showPanel / onShowWidget 等被 Omit 的原因一致。
+  'getAreaItems' |
+  'onDisableWidget' |
+  'onEnableWidget' |
   'add'
 > {
   editor: IEditor;
@@ -91,6 +97,19 @@ export interface ISkeleton extends Omit<IPublicApiSkeleton,
   getWidget(name: string): IWidget | undefined;
 
   buildFromConfig(config?: EditorConfig, components?: PluginClassSet): void;
+
+  /**
+   * 向 editor.eventBus 派发骨架事件。
+   * 具体 Skeleton 类一直有此方法，之前漏在接口上声明，
+   * 导致 widget-views 等消费方（拿到的是 ISkeleton）读取时报 TS2339。
+   */
+  postEvent(event: SkeletonEvents, ...args: any[]): void;
+
+  /**
+   * 在「左侧固定区」与「左侧浮动区」之间切换面板。
+   * 同样属于具体 Skeleton 类已有、但接口漏声明的方法（panel-operation-row 会调用它）。
+   */
+  toggleFloatStatus(panel: Panel): void;
 
   createStage(config: any): string | undefined;
 
@@ -432,14 +451,17 @@ export class Skeleton implements ISkeleton {
     const { content, ...restConfig } = config;
     if (content) {
       if (isPlainObject(content) && !isValidElement(content)) {
-        Object.keys(content).forEach((key) => {
+        // isPlainObject 的类型守卫是 `value is any`，并不会把 content 收窄成「可索引对象」，
+        // 所以这里显式按记录读取（上面已经确认它是普通对象、且不是 React 元素）。
+        const contentRecord = content as unknown as Record<string, any>;
+        Object.keys(contentRecord).forEach((key) => {
           if (/props$/i.test(key) && restConfig[key]) {
             restConfig[key] = {
               ...restConfig[key],
-              ...content[key],
+              ...contentRecord[key],
             };
           } else {
-            restConfig[key] = content[key];
+            restConfig[key] = contentRecord[key];
           }
         });
       } else {

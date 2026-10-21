@@ -35,7 +35,7 @@ describe('utils/schema/handleSubNodes', () => {
     });
 
     expect(result).toMatchInlineSnapshot(`
-      Array [
+      [
         "Modal",
         "AliAutoDivDefault",
         "AliAutoDivDefault",

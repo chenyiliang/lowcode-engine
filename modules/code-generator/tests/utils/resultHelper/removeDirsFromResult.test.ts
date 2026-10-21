@@ -8,7 +8,7 @@ describe('CodeGen.utils.resultHelper.removeDirsFromResult', () => {
   it('could remove src by "src"', () => {
     const result = loadResult();
     expect(listAllDirs(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         "",
         "src",
         "src/components",
@@ -19,7 +19,7 @@ describe('CodeGen.utils.resultHelper.removeDirsFromResult', () => {
     const removed = CodeGen.utils.resultHelper.removeDirsFromResult(result, 'src');
 
     expect(listAllDirs(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         "",
       ]
     `);
@@ -30,7 +30,7 @@ describe('CodeGen.utils.resultHelper.removeDirsFromResult', () => {
   it('could remove src/components/Hello by "*/components/*"', () => {
     const result = loadResult();
     expect(listAllDirs(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         "",
         "src",
         "src/components",
@@ -41,7 +41,7 @@ describe('CodeGen.utils.resultHelper.removeDirsFromResult', () => {
     const removed = CodeGen.utils.resultHelper.removeDirsFromResult(result, '*/components/*');
 
     expect(listAllDirs(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         "",
         "src",
         "src/components",
@@ -54,7 +54,7 @@ describe('CodeGen.utils.resultHelper.removeDirsFromResult', () => {
   it('could remove all dirs by "*"', () => {
     const result = loadResult();
     expect(listAllDirs(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         "",
         "src",
         "src/components",
@@ -65,7 +65,7 @@ describe('CodeGen.utils.resultHelper.removeDirsFromResult', () => {
     const removed = CodeGen.utils.resultHelper.removeDirsFromResult(result, '*');
 
     expect(listAllDirs(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         "",
       ]
     `);
@@ -76,7 +76,7 @@ describe('CodeGen.utils.resultHelper.removeDirsFromResult', () => {
   it('could remove all dirs by "**"', () => {
     const result = loadResult();
     expect(listAllDirs(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         "",
         "src",
         "src/components",
@@ -87,7 +87,7 @@ describe('CodeGen.utils.resultHelper.removeDirsFromResult', () => {
     const removed = CodeGen.utils.resultHelper.removeDirsFromResult(result, '**');
 
     expect(listAllDirs(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         "",
       ]
     `);

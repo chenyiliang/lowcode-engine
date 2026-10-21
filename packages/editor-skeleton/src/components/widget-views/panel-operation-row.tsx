@@ -6,7 +6,7 @@ import { IconFloat } from '../../icons/float';
 import { Panel } from '../../widget/panel';
 
 export default class PanelOperationRow extends Component<{ panel: Panel }> {
-  constructor(props) {
+  constructor(props: { panel: Panel }) {
     super(props);
     makeObservable(this);
   }
@@ -37,7 +37,11 @@ export default class PanelOperationRow extends Component<{ panel: Panel }> {
     const hideTitleBar = panel?.config.props?.hideTitleBar;
 
     const areaName = panel?.parent?.name;
-    const area = panel.skeleton[areaName];
+    // areaName 可能是 undefined，且 ISkeleton 上没有按名字取区域的索引签名；
+    // 这里按名字取出对应区域（leftFloatArea / leftFixedArea 等），只用到 setVisible。
+    const area = areaName
+      ? (panel.skeleton as unknown as Record<string, { setVisible(flag: boolean): void } | undefined>)[areaName]
+      : undefined;
 
     return (
       <Fragment>

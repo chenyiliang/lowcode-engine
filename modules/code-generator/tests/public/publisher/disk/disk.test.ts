@@ -49,8 +49,10 @@ describe('public/publisher/disk/disk', () => {
     const disk = CodeGen.publishers.disk({});
     expect(disk.publish()).rejects.toBeTruthy();
 
+    // Jest 30 移除了已废弃的 toThrowError 别名（会报
+    // `TypeError: expect(...).toThrowError is not a function`），改用 toThrow，语义完全相同。
     expect(() => {
       return disk.getProject();
-    }).toThrowError(/MissingProject/);
+    }).toThrow(/MissingProject/);
   });
 });

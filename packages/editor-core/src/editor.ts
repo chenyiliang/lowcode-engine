@@ -39,7 +39,19 @@ const AssetsCache: {
   [key: string]: IPublicTypeRemoteComponentDescription;
 } = {};
 
-export declare interface Editor extends StrictEventEmitter<EventEmitter, GlobalEvent.EventConfig> {
+/**
+ * Editor 同时是「EventEmitter 实例」和「IEditor」，这里用声明合并补上事件方法的签名。
+ *
+ * 注意：不能再 extends StrictEventEmitter<EventEmitter, ...>。
+ * @types/node 22+ 把 EventEmitter 变成了带泛型参数的类（EventEmitter<DefaultEventMap>），
+ * 其 on/emit 与 StrictEventEmitter 生成的重载签名不再「完全一致」，
+ * 声明合并会直接报 TS2320。而 GlobalEvent.EventConfig 本身带
+ * `[eventName: string]: any` 索引签名，严格事件名约束在这里并不产生额外约束，
+ * 因此直接沿用 EventEmitter 的宽松签名即可，语义等价。
+ */
+export declare interface Editor extends EventEmitter {
+  on(event: string | symbol, listener: (...args: any[]) => void): this;
+  emit(event: string | symbol, ...args: any[]): boolean;
   addListener(event: string | symbol, listener: (...args: any[]) => void): this;
   once(event: string | symbol, listener: (...args: any[]) => void): this;
   removeListener(event: string | symbol, listener: (...args: any[]) => void): this;
@@ -167,7 +179,7 @@ export class Editor extends EventEmitter implements IEditor {
                       ...extraNpmInfo,
                     },
                     ...d,
-                  } || []);
+                  });
                 });
                 return;
               }
@@ -178,7 +190,7 @@ export class Editor extends EventEmitter implements IEditor {
                     ...extraNpmInfo,
                   },
                   ...component.components,
-                } || []);
+                });
               }
             }
             function setArrayAssets(value: any[], preExportName: string = '', preSubName: string = '') {

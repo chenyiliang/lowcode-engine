@@ -19,7 +19,7 @@ import {
   IBaseModelNode,
 } from '@alilc/lowcode-types';
 import { compatStage, isDOMText, isJSExpression, isNode, isNodeSchema } from '@alilc/lowcode-utils';
-import { ISettingTopEntry } from '@alilc/lowcode-designer';
+import { ISettingTopEntry } from '../../designer/setting/setting-top-entry';
 import { Props, getConvertedExtraKey, IProps } from './props/props';
 import type { IDocumentModel } from '../document-model';
 import { NodeChildren, INodeChildren } from './node-children';

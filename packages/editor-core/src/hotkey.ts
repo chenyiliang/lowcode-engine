@@ -1,6 +1,14 @@
 import { isEqual } from 'lodash';
 import { globalContext } from './di';
-import { IPublicTypeHotkeyCallback, IPublicTypeHotkeyCallbackConfig, IPublicTypeHotkeyCallbacks, IPublicApiHotkey } from '@alilc/lowcode-types';
+import type { IEditor } from './editor';
+import {
+  IPublicTypeHotkeyCallback,
+  IPublicTypeHotkeyCallbackConfig,
+  IPublicTypeHotkeyCallbacks,
+  IPublicApiHotkey,
+  IPublicApiWorkspace,
+  IPublicModelSelection,
+} from '@alilc/lowcode-types';
 
 interface KeyMap {
   [key: number]: string;
@@ -316,9 +324,13 @@ function getKeyInfo(combination: string, action?: string): KeyInfo {
  */
 function fireCallback(callback: IPublicTypeHotkeyCallback, e: KeyboardEvent, combo?: string, sequence?: string): void {
   try {
-    const workspace = globalContext.get('workspace');
-    const editor = workspace.isActive ? workspace.window?.editor : globalContext.get('editor');
-    const designer = editor?.get('designer');
+    const workspace = globalContext.get<IPublicApiWorkspace>('workspace');
+    // workspace 模式下，运行时的 window 实例（workspace 包的 IEditorWindow）带有 editor，
+    // 但公共类型 IPublicModelWindow 未声明它，这里按结构类型取，避免反向 import workspace（成环）
+    const activeWindow = workspace?.window as ({ editor?: IEditor } & object) | null | undefined;
+    const editor = workspace?.isActive ? activeWindow?.editor : globalContext.get<IEditor>('editor');
+    // 只用结构类型取 currentSelection，避免 import 具体 IDesigner（designer 反向依赖 editor-core，会成环）
+    const designer = editor?.get('designer') as { currentSelection?: IPublicModelSelection } | undefined;
     const node = designer?.currentSelection?.getNodes()?.[0];
     const npm = node?.componentMeta?.npm;
     const selected =
@@ -335,7 +347,7 @@ function fireCallback(callback: IPublicTypeHotkeyCallback, e: KeyboardEvent, com
       selected,
     });
   } catch (err) {
-    console.error(err.message);
+    console.error((err as Error).message);
   }
 }
 

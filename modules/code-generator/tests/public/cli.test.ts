@@ -18,7 +18,7 @@ describe('cli - lowcode-code-generator', () => {
       stdout: res.stdout,
       stderr: res.stderr,
     }).toMatchInlineSnapshot(`
-      Object {
+      {
         "status": 0,
         "stderr": "",
         "stdout": "",

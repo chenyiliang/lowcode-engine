@@ -1,8 +1,9 @@
-import { Component, MouseEvent, Fragment, ReactNode } from 'react';
+import { Component, MouseEvent, Fragment } from 'react';
 import { shallowIntl, observer, obx, engineConfig, runInAction } from '@alilc/lowcode-editor-core';
 import { createContent, isJSSlot, isSetterConfig, shouldUseVariableSetter } from '@alilc/lowcode-utils';
-import { Skeleton, Stage } from '@alilc/lowcode-editor-skeleton';
-import { IPublicApiSetters, IPublicTypeCustomView, IPublicTypeDynamicProps } from '@alilc/lowcode-types';
+import { Skeleton } from '../../skeleton';
+import { Stage } from '../../widget/stage';
+import { IPublicApiSetters, IPublicTypeCustomView, IPublicTypeSetterType } from '@alilc/lowcode-types';
 import { ISettingEntry, IComponentMeta, ISettingField, isSettingField, ISettingTopEntry } from '@alilc/lowcode-designer';
 import { createField } from '../field';
 import PopupService, { PopupPipe } from '../popup';
@@ -111,9 +112,16 @@ class SettingFieldView extends Component<SettingFieldViewProps, SettingFieldView
     const { defaultValue } = extraProps;
 
     const { setter } = this.field;
-    let setterProps: {
-      setters?: (ReactNode | string)[];
-    } & Record<string, unknown> | IPublicTypeDynamicProps = {};
+    // setterProps 最终一定是「对象」形态：
+    // IPublicTypeSetterConfig.props 可以是对象或动态函数，动态函数在下面的 typeof 分支里
+    // 已被调用求值成对象。因此这里把变量声明成对象形态（带索引签名），
+    // 避免联合类型导致后续 .defaultValue / .setters 等属性访问报 TS2339。
+    // setters 数组里放的是 MixedSetter 的子 setter（setter 配置 / setter 名），不是 ReactNode。
+    type SetterItem = IPublicTypeSetterType | null;
+    type SetterProps = {
+      setters?: (SetterItem | string)[];
+    } & Record<string, unknown>;
+    let setterProps: SetterProps = {};
     let setterType: any;
     let initialValue: any = null;
 
@@ -125,10 +133,10 @@ class SettingFieldView extends Component<SettingFieldViewProps, SettingFieldView
     } else if (isSetterConfig(setter)) {
       setterType = setter.componentName;
       if (setter.props) {
-        setterProps = setter.props;
-        if (typeof setterProps === 'function') {
-          setterProps = setterProps(this.field.internalToShellField());
-        }
+        const rawProps = setter.props;
+        setterProps = typeof rawProps === 'function'
+          ? rawProps(this.field.internalToShellField()) as SetterProps
+          : rawProps as SetterProps;
       }
       if (setter.initialValue != null) {
         initialValue = setter.initialValue;

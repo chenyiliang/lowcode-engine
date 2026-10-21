@@ -18,7 +18,8 @@ import { ISettingPropEntry, SettingPropEntry } from './setting-prop-entry';
 import { computed, obx, makeObservable, action, untracked, intl } from '@alilc/lowcode-editor-core';
 import { cloneDeep, isCustomView, isDynamicSetter, isJSExpression } from '@alilc/lowcode-utils';
 import { ISettingTopEntry } from './setting-top-entry';
-import { IComponentMeta, INode } from '@alilc/lowcode-designer';
+import { IComponentMeta } from '../../component-meta';
+import { INode } from '../../document/node/node';
 
 function getSettingFieldCollectorKey(parent: ISettingTopEntry | ISettingField, config: IPublicTypeFieldConfig) {
   let cur = parent;
@@ -37,7 +38,7 @@ export interface ISettingField extends ISettingPropEntry, Omit<IBaseModelSetting
   ISettingField,
   IComponentMeta,
   INode
->, 'setValue' | 'key' | 'node'> {
+>, 'setValue' | 'key' | 'node' | 'title'> {
   readonly isSettingField: true;
 
   readonly isRequired: boolean;
@@ -48,7 +49,13 @@ export interface ISettingField extends ISettingPropEntry, Omit<IBaseModelSetting
 
   get items(): Array<ISettingField | IPublicTypeCustomView>;
 
-  get title(): string | ReactNode | undefined;
+  /**
+   * 标题内容。
+   * 实现返回的是 IPublicTypeTitleContent（string | i18n 数据 | ReactNode | TitleConfig），
+   * 消费方（如设置面板）也是把它直接交给 Title 组件（其 props 就是 IPublicTypeTitleContent），
+   * 原先声明成 string | ReactNode 比实现更窄，导致具体类赋值给接口时报 TS2416。
+   */
+  get title(): IPublicTypeTitleContent | undefined;
 
   get setter(): IPublicTypeSetterType | null;
 
@@ -307,7 +314,10 @@ export class SettingField extends SettingPropEntry implements ISettingField {
   }
 
   onEffect(action: () => void): IPublicTypeDisposable {
-    return this.designer!.autorun(action, true);
+    // 原来这里传的是 `true`，但 mobx 的 autorun 第二个参数是 IAutorunOptions 对象
+    // （只会读取 name / scheduler / delay / onError / requiresObservable 等属性），
+    // 传布尔值不会有任何效果，等价于不传。这里按实际语义去掉该参数。
+    return this.designer!.autorun(action);
   }
 
   internalToShellField() {

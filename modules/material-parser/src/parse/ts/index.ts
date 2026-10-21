@@ -345,7 +345,9 @@ function getDocgenTypeHelper(
           type,
         ),
         returns: getFunctionReturns(
-          checker.typeToTypeNode(type, type?.symbol?.valueDeclaration),
+          // TS 5.0+ 起 typeToTypeNode 增加了必填的第三参数 flags（NodeBuilderFlags | undefined），
+          // 传 undefined 即沿用默认行为，与旧版本一致。
+          checker.typeToTypeNode(type, type?.symbol?.valueDeclaration, undefined),
           checker,
           parentIds,
           type,

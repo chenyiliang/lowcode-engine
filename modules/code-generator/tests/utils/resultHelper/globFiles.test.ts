@@ -6,7 +6,7 @@ describe('CodeGen.utils.resultHelper.globFiles', () => {
     const result = require('./example-result.json') as any;
     const files = CodeGen.utils.resultHelper.globFiles(result, '**/*');
     expect(Array.from(files).map(_.first)).toMatchInlineSnapshot(`
-      Array [
+      [
         "package.json",
         "src/index.js",
         "src/index.css",
@@ -21,7 +21,7 @@ describe('CodeGen.utils.resultHelper.globFiles', () => {
     const result = require('./example-result.json') as any;
     const files = CodeGen.utils.resultHelper.globFiles(result, '**/*', { dot: true });
     expect(Array.from(files).map(_.first)).toMatchInlineSnapshot(`
-      Array [
+      [
         ".eslintrc",
         "package.json",
         "src/index.js",
@@ -37,7 +37,7 @@ describe('CodeGen.utils.resultHelper.globFiles', () => {
     const result = require('./example-result.json') as any;
     const files = CodeGen.utils.resultHelper.globFiles(result, '**/*.js');
     expect(Array.from(files).map(_.first)).toMatchInlineSnapshot(`
-      Array [
+      [
         "src/index.js",
         "src/components/index.js",
         "src/components/Hello/index.js",
@@ -49,7 +49,7 @@ describe('CodeGen.utils.resultHelper.globFiles', () => {
     const result = require('./example-result.json') as any;
     const files = CodeGen.utils.resultHelper.globFiles(result, 'package.json');
     expect(Array.from(files).map(_.first)).toMatchInlineSnapshot(`
-      Array [
+      [
         "package.json",
       ]
     `);
@@ -59,7 +59,7 @@ describe('CodeGen.utils.resultHelper.globFiles', () => {
     const result = require('./example-result.json') as any;
     const files = CodeGen.utils.resultHelper.globFiles(result, '**/components/*/index.js');
     expect(Array.from(files).map(_.first)).toMatchInlineSnapshot(`
-      Array [
+      [
         "src/components/Hello/index.js",
       ]
     `);

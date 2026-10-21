@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Tab, Breadcrumb } from '@alifd/next';
-import { Title, observer, Editor, obx, globalContext, engineConfig, makeObservable } from '@alilc/lowcode-editor-core';
+import { Title, observer, Editor, obx, engineConfig, makeObservable } from '@alilc/lowcode-editor-core';
 import { Node, SettingField, isSettingField, INode } from '@alilc/lowcode-designer';
 import classNames from 'classnames';
 import { SettingsMain } from './main';
@@ -42,7 +42,11 @@ export class SettingsPrimaryPane extends Component<ISettingsPrimaryPaneProps, { 
   }
 
   async setShouldIgnoreRoot() {
-    const designMode = await globalContext.get('editor').get('designMode');
+    // 原来用 globalContext.get('editor')，但 power-di 的 get<T = undefined> 默认类型参数是 undefined，
+    // 拿到的是 never，后续 .get('designMode') 直接报 TS2339。
+    // 本组件已经持有同一个 editor 实例（props.engineEditor，本文件其它地方也都用它），
+    // 改为显式带上泛型参数取 designMode。
+    const designMode = await this.props.engineEditor.get<string>('designMode');
     this.setState({
       shouldIgnoreRoot: designMode === 'live',
     });
@@ -261,9 +265,9 @@ export class SettingsPrimaryPane extends Component<ISettingsPrimaryPaneProps, { 
   }
 }
 
-function hoverNode(node: Node, flag: boolean) {
+function hoverNode(node: INode, flag: boolean) {
   node.hover(flag);
 }
-function selectNode(node: Node) {
+function selectNode(node: INode) {
   node?.select();
 }

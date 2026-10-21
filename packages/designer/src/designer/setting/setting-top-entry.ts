@@ -24,6 +24,16 @@ export interface ISettingTopEntry extends ISettingEntry, IPublicModelSettingTopE
 
   readonly path: never[];
 
+  /**
+   * nodes 中的第一个节点。
+   * 具体 SettingTopEntry 类一直有此字段，之前漏在接口上声明，
+   * 导致消费方（editor-skeleton 的设置面板）读取 first / isLocked 时报 TS2339。
+   */
+  readonly first: INode;
+
+  /** 首个节点是否被锁定（委托给 first.isLocked） */
+  readonly isLocked: boolean;
+
   items: Array<ISettingField | IPublicTypeCustomView>;
 
   componentMeta: IComponentMeta | null;

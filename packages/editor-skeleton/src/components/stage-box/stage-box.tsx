@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { observer } from '@alilc/lowcode-editor-core';
+import type { ISettingTopEntry, ISettingField } from '@alilc/lowcode-designer';
 import StageChain from './stage-chain';
 import Stage from './stage';
 import { ISkeleton } from '../../skeleton';
@@ -14,6 +15,12 @@ export type StageBoxProps = typeof StageBoxDefaultProps & {
   className?: string;
   children: React.ReactNode;
   skeleton: ISkeleton;
+  /**
+   * 该 stage 对应的设置项（ISettingTopEntry / ISettingField）。
+   * 调用方（设置面板）会传它以便标识当前 StageBox 服务于哪个设置项；
+   * StageBox 自身不消费该值（内部用 children 建 stage），故声明为可选。
+   */
+  target?: ISettingTopEntry | ISettingField;
 };
 
 type WillDetachMember = () => void;

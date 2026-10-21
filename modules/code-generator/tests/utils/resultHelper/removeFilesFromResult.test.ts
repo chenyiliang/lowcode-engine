@@ -8,7 +8,7 @@ describe('CodeGen.utils.resultHelper.removeFilesFromResult', () => {
   it('could remove package.json by "package.json"', () => {
     const result = loadResult();
     expect(listAllFiles(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         ".eslintrc",
         "package.json",
         "src/index.js",
@@ -22,7 +22,7 @@ describe('CodeGen.utils.resultHelper.removeFilesFromResult', () => {
     const removed = CodeGen.utils.resultHelper.removeFilesFromResult(result, 'package.json');
 
     expect(listAllFiles(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         ".eslintrc",
         "src/index.js",
         "src/index.css",
@@ -38,7 +38,7 @@ describe('CodeGen.utils.resultHelper.removeFilesFromResult', () => {
   it('could remove .eslintrc.json by ".eslintrc" with dot=true', () => {
     const result = loadResult();
     expect(listAllFiles(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         ".eslintrc",
         "package.json",
         "src/index.js",
@@ -54,7 +54,7 @@ describe('CodeGen.utils.resultHelper.removeFilesFromResult', () => {
     });
 
     expect(listAllFiles(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         "package.json",
         "src/index.js",
         "src/index.css",
@@ -70,7 +70,7 @@ describe('CodeGen.utils.resultHelper.removeFilesFromResult', () => {
   it('could remove all css files by "**/*.css"', () => {
     const result = loadResult();
     expect(listAllFiles(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         ".eslintrc",
         "package.json",
         "src/index.js",
@@ -84,7 +84,7 @@ describe('CodeGen.utils.resultHelper.removeFilesFromResult', () => {
     const removed = CodeGen.utils.resultHelper.removeFilesFromResult(result, '**/*.css');
 
     expect(listAllFiles(result)).toMatchInlineSnapshot(`
-      Array [
+      [
         ".eslintrc",
         "package.json",
         "src/index.js",

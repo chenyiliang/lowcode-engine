@@ -13,6 +13,7 @@ export interface PluginProps {
 interface DesignerPluginState {
   componentMetadatas?: any[] | null;
   library?: any[] | null;
+  utilsMetadata?: any[] | null;
   extraEnvironment?: any[] | null;
   renderEnv?: string;
   device?: string;

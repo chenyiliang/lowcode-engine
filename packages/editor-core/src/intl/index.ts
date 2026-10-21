@@ -29,9 +29,14 @@ function injectVars(msg: string, params: any, locale: string): string {
   return formater.format(params as any) as string;
 }
 
-export function intl(data: IPublicTypeI18nData | string, params?: object): ReactNode {
+/**
+ * i18n 转换：只处理 i18n 数据结构，其余（字符串、React 元素等）原样返回。
+ * React 19 里 ReactNode 形态变多，标题 / tip 等场景可能直接传入非文本节点，
+ * 因此入参放宽到 ReactNode，内部用 isI18nData 类型守卫收窄。
+ */
+export function intl(data: IPublicTypeI18nData | string | ReactNode, params?: object): ReactNode {
   if (!isI18nData(data)) {
-    return data;
+    return data as ReactNode;
   }
   if (data.intl) {
     return data.intl;

@@ -1,4 +1,4 @@
-import { ComponentType, forwardRef, createElement, FunctionComponent } from 'react';
+import { ComponentType, forwardRef, createElement, FunctionComponent, HTMLAttributes } from 'react';
 import { IPublicTypeNpmInfo, IPublicTypeComponentSchema, IPublicTypeProjectSchema } from '@alilc/lowcode-types';
 import { isESModule } from './is-es-module';
 import { isReactComponent, acceptsRef, wrapReactClass } from './is-react';
@@ -11,6 +11,9 @@ interface LibraryMap {
   [key: string]: string;
 }
 
+// 这里包的是 a/img/div/span/svg 等原生标签，直接用 React 的 HTML 属性类型
+type HtmlCompProps = HTMLAttributes<HTMLElement>;
+
 export function accessLibrary(library: string | Record<string, unknown>) {
   if (typeof library !== 'string') {
     return library;
@@ -21,8 +24,9 @@ export function accessLibrary(library: string | Record<string, unknown>) {
 
 export function generateHtmlComp(library: string) {
   if (['a', 'img', 'div', 'span', 'svg'].includes(library)) {
-    return forwardRef((props, ref) => {
-      return createElement(library, { ref, ...props }, props.children);
+    return forwardRef<HTMLElement, HtmlCompProps>((props, ref) => {
+      const { children, ...rest } = props;
+      return createElement(library, { ref, ...rest }, children);
     });
   }
 }

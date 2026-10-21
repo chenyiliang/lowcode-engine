@@ -1,4 +1,5 @@
-import { ComponentType } from 'react';
+// emitDecoratorMetadata + isolatedModules 下，被装饰签名里引用的类型必须用 import type 引入
+import type { ComponentType } from 'react';
 import { obx, computed, autorun, makeObservable, IReactionPublic, IReactionOptions, IReactionDisposer } from '@alilc/lowcode-editor-core';
 import {
   IPublicTypeProjectSchema,
@@ -20,7 +21,7 @@ import {
 } from '@alilc/lowcode-types';
 import { mergeAssets, IPublicTypeAssetsJson, isNodeSchema, isDragNodeObject, isDragNodeDataObject, isLocationChildrenDetail, Logger } from '@alilc/lowcode-utils';
 import { IProject, Project } from '../project';
-import { Node, DocumentModel, insertChildren, INode, ISelection } from '../document';
+import { Node, DocumentModel, insertChildren, INode, ISelection, IDocumentModel } from '../document';
 import { ComponentMeta, IComponentMeta } from '../component-meta';
 import { INodeSelector, Component } from '../simulator';
 import { Scroller } from './scroller';
@@ -39,7 +40,12 @@ const logger = new Logger({ level: 'warn', bizName: 'designer' });
 export interface DesignerProps {
   [key: string]: any;
   editor: IPublicModelEditor;
-  shellModelFactory: IShellModelFactory;
+  /**
+   * shell 模型工厂。
+   * 直接 new Designer() 时是必需的（context-menu-actions / setting-field / node 都会用到）；
+   * 通过 DesignerView 注入已有 designer 时用不到，故在 props 类型上声明为可选。
+   */
+  shellModelFactory?: IShellModelFactory;
   className?: string;
   style?: object;
   defaultSchema?: IPublicTypeProjectSchema;
@@ -82,6 +88,13 @@ export interface IDesigner {
   get simulatorComponent(): ComponentType<any> | undefined;
 
   get currentSelection(): ISelection;
+
+  /**
+   * 当前文档模型（等价于 project.currentDocument）。
+   * 具体 Designer 类一直有此 getter，之前漏在接口上声明，
+   * 消费方（renderer-core、react-simulator-renderer）会读取它做统计。
+   */
+  get currentDocument(): IDocumentModel | null | undefined;
 
   createScroller(scrollable: IPublicTypeScrollable): IPublicModelScroller;
 
@@ -178,7 +191,9 @@ export class Designer implements IDesigner {
     const { editor, viewName, shellModelFactory } = props;
     this.editor = editor;
     this.viewName = viewName;
-    this.shellModelFactory = shellModelFactory;
+    // props 里 shellModelFactory 是可选的（DesignerView 注入已有 designer 时不需要），
+    // 但直接构造 Designer 必须有它；缺省属调用方用法错误。
+    this.shellModelFactory = shellModelFactory as IShellModelFactory;
     this.setProps(props);
 
     this.project = new Project(this, props.defaultSchema, viewName);

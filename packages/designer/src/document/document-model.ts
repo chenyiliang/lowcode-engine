@@ -25,7 +25,7 @@ import type {
 } from '@alilc/lowcode-types';
 import type {
   IDropLocation,
-} from '@alilc/lowcode-designer';
+} from '../designer/location';
 import {
   uniqueId,
   isPlainObject,

@@ -6,6 +6,24 @@
 
 import { some } from 'lodash';
 
+/**
+ * legao 的样式运行时结构：
+ * - 叶子层是「属性名 -> 属性值」的扁平映射
+ * - 顶层可以用伪类（default / hover / focus ...）再嵌一层扁平映射
+ * - `extra` 用于原样透传无法解析的 css 片段
+ */
+type StyleValue = string | string[] | StyleObject;
+
+interface StyleObject {
+  [key: string]: StyleValue;
+}
+
+interface CssRuntime {
+  extra?: string[];
+  default?: Record<string, string>;
+  [pseudo: string]: string[] | Record<string, string> | undefined;
+}
+
 const pseudoMap = ['hover', 'focus', 'active', 'visited'];
 
 const RE_CAMEL = /[A-Z]/g;
@@ -44,13 +62,16 @@ function camelize(str: string): string {
   return str.replace(RE_HYPHEN, (m, w) => (w ? w.toUpperCase() : ''));
 }
 
+/** 扁平样式：属性名 -> 属性值 */
+type FlatStyle = Record<string, string>;
+
 /**
  * convert
  * {background-color: "red"}
  * to
  * background-color: red;
  */
-function runtimeToCss(runtime: Record<string, string>) {
+function runtimeToCss(runtime: StyleObject) {
   const css: string[] = [];
   Object.keys(runtime).forEach((key) => {
     css.push(`  ${key}: ${runtime[key]};`);
@@ -58,53 +79,53 @@ function runtimeToCss(runtime: Record<string, string>) {
   return css.join('\n');
 }
 
-function toNativeStyle(runtime: Record<string, string> | undefined) {
+function toNativeStyle(runtime: StyleObject | undefined): StyleObject {
   if (!runtime) {
     return {};
   }
   if (runtime.default) {
-    const normalized: Record<string, string> = {};
+    const normalized: StyleObject = {};
     Object.keys(runtime).forEach((pseudo) => {
       if (pseudo === 'extra') {
         normalized[pseudo] = runtime[pseudo];
         return;
       }
-      normalized[pseudo] = toNativeStyle(runtime[pseudo]);
+      normalized[pseudo] = toNativeStyle(runtime[pseudo] as StyleObject);
     });
     return normalized;
   }
 
-  const normalized = {};
+  const normalized: StyleObject = {};
   Object.keys(runtime).forEach((key) => {
     normalized[camelize(key)] = runtime[key];
   });
   return normalized;
 }
 
-function normalizeStyle(style) {
+function normalizeStyle(style?: StyleObject): StyleObject {
   if (!style) {
     return {};
   }
   if (style.default) {
-    const normalized = {};
+    const normalized: StyleObject = {};
     Object.keys(style).forEach((pseudo) => {
       if (pseudo === 'extra') {
         normalized[pseudo] = style[pseudo];
         return;
       }
-      normalized[pseudo] = normalizeStyle(style[pseudo]);
+      normalized[pseudo] = normalizeStyle(style[pseudo] as StyleObject);
     });
     return normalized;
   }
 
-  const normalized: Record<string, string | Record<string, string>> = {};
+  const normalized: StyleObject = {};
   Object.keys(style).forEach((key) => {
     normalized[hyphenate(key)] = style[key];
   });
   return normalized;
 }
 
-function toCss(runtime) {
+function toCss(runtime?: CssRuntime): string {
   if (!runtime) {
     return (
       `:root {
@@ -123,29 +144,27 @@ function toCss(runtime) {
       const prefix = pseudoMap.indexOf(pseudo) > -1 ? ':' : '';
       css.push(
         `:root${pseudo === 'default' ? '' : `${prefix}${pseudo}`} {
-${runtimeToCss(normalizeStyle(runtime[pseudo]))}
+${runtimeToCss(normalizeStyle(runtime[pseudo] as StyleObject))}
 }\n`,
 );
     });
     return css.join('\n');
   }
 
+  // 走到这里说明 runtime 没有伪类分层，本身就是一层扁平样式
   return (
     `:root {
-${runtimeToCss(normalizeStyle(runtime))}
+${runtimeToCss(normalizeStyle(runtime as StyleObject))}
 }
 `
   );
 }
 
-function cssToRuntime(css: string) {
+function cssToRuntime(css: string): CssRuntime {
   if (!css) {
     return {};
   }
-  const runtime: {
-    extra?: string[];
-    default?: Record<string, string>;
-  } = {};
+  const runtime: CssRuntime = {};
   const groups = groupingCss(css);
   groups.forEach((cssItem) => {
     if (!cssItem.startsWith(':root')) {
@@ -190,13 +209,13 @@ function cssToRuntime(css: string) {
   return runtime;
 }
 
-function cssToStyle(css) {
+function cssToStyle(css: string | StyleObject): StyleObject {
   try {
     if (isString(css)) {
       return toNativeStyle(cssToRuntime(css).default);
     }
     if (css.default) {
-      return toNativeStyle(normalizeStyle(css.default));
+      return toNativeStyle(normalizeStyle(css.default as StyleObject));
     }
     return toNativeStyle(normalizeStyle(css));
   } catch (e) {

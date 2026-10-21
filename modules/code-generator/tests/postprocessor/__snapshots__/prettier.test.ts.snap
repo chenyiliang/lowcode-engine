@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`postprocessor/prettier should works for custom files 1`] = `
 "<template>
@@ -20,9 +20,9 @@ export function App() {
 
 exports[`postprocessor/prettier should works for json file 1`] = `
 "{
-  \\"components\\": [
-    \\"Button\\",
-    \\"Block\\"
+  "components": [
+    "Button",
+    "Block"
   ]
 }
 "

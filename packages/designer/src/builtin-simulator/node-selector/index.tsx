@@ -4,7 +4,7 @@ import { Title, observer } from '@alilc/lowcode-editor-core';
 import { canClickNode } from '@alilc/lowcode-utils';
 import './index.less';
 
-import { INode } from '@alilc/lowcode-designer';
+import { INode } from '../../document/node/node';
 
 const { Popup } = Overlay;
 

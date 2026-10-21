@@ -1,7 +1,7 @@
 import { Component, Fragment } from 'react';
 import classNames from 'classnames';
 import { observer } from '@alilc/lowcode-editor-core';
-import { Area } from '@alilc/lowcode-editor-skeleton';
+import { Area } from '../area';
 
 @observer
 export default class SubTopArea extends Component<{ area: Area; itemClassName?: string }> {

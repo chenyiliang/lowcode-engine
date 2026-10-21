@@ -1,7 +1,6 @@
 import {
   Component,
   Fragment,
-  ReactNodeArray,
   isValidElement,
   cloneElement,
   createElement,
@@ -100,7 +99,8 @@ class Toolbar extends Component<{ observed: OffsetObserver }> {
       style.justifyContent = 'flex-start';
     }
     const { node } = observed;
-    const actions: ReactNodeArray = [];
+    // React 19 移除了 ReactNodeArray（原为 ReadonlyArray<ReactNode>），此处是可写数组，改用 ReactNode[]
+    const actions: ReactNode[] = [];
     node.componentMeta.availableActions.forEach((action) => {
       const { important = true, condition, content, name } = action;
       if (node.isSlot() && (name === 'copy' || name === 'remove')) {

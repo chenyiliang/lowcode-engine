@@ -36,7 +36,7 @@ function transformStringToFunction(str: string) {
     fn = new Function(fnBody)();
   } catch (e) {
     logger.error(str);
-    logger.error(e.message);
+    logger.error((e as Error).message);
   }
   return fn;
 }

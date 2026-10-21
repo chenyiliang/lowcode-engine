@@ -1,8 +1,9 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "lib",
-    "jsx": "react"
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false
   },
-  "include": ["./src/"],
+  "include": ["src"]
 }

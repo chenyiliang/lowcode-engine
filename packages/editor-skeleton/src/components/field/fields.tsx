@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unused-prop-types */
-import { Component, ErrorInfo, MouseEvent } from 'react';
+import { Component, ErrorInfo, MouseEvent, ReactNode } from 'react';
 import { isObject } from 'lodash';
 import classNames from 'classnames';
 import { Icon } from '@alifd/next';
@@ -25,6 +25,8 @@ export interface FieldProps {
   tip?: any;
   onExpandChange?: (expandState: boolean) => void;
   onClear?: () => void;
+  // React 19：React.FC / Component 不再隐式带 children，需显式声明
+  children?: ReactNode;
 }
 
 export class Field extends Component<FieldProps> {
@@ -201,7 +203,18 @@ export class Field extends Component<FieldProps> {
  *
  * TODO: turn number to enum
  */
-function createValueState(/* valueState?: number, onClear?: (e: React.MouseEvent) => void */) {
+/**
+ * 值状态标识（当前实现被禁用，恒返回 null）。
+ * 参数原先被整段注释掉，但调用方仍按 (valueState, onClear) 传参，
+ * 在新版 TS 下会报「Expected 0 arguments, but got 2」。
+ * 这里把形参声明回来（保持可选、且不参与实现），运行时行为与之前完全一致。
+ */
+function createValueState(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _valueState?: number,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _onClear?: (e: MouseEvent) => void,
+) {
   return null;
 }
 

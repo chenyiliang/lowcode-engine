@@ -284,9 +284,41 @@ export function leafWrapper(Comp: types.IBaseRenderComponent, {
       return container?.autoRepaintNode;
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps: any) {
       this.recordTime();
+      this.handlePropsUpdate(prevProps);
     }
+
+    /**
+     * React 19 移除了 componentWillReceiveProps。
+     * 原逻辑是「收到新 props 时，若 __tag 变化则重建事件监听并重置 state」，
+     * 等价迁移到 componentDidUpdate：此时 this.props 即原来的 nextProps，
+     * prevProps 即原来的 this.props，比较条件相应互换。
+     * （会在更新后多触发一次 render，这是官方推荐的迁移方式。）
+     */
+    handlePropsUpdate(prevProps: any) {
+      const { componentId } = this.props;
+      if (this.props.__tag === prevProps.__tag) {
+        return;
+      }
+
+      const _leaf = getNode?.(componentId);
+      if (_leaf && this.curEventLeaf && _leaf !== this.curEventLeaf) {
+        this.disposeFunctions.forEach((fn) => fn());
+        this.disposeFunctions = [];
+        this.initOnChildrenChangeEvent(_leaf);
+        this.initOnPropsChangeEvent(_leaf);
+        this.initOnVisibleChangeEvent(_leaf);
+        this.curEventLeaf = _leaf;
+      }
+
+      const {
+        visible,
+        ...resetState
+      } = this.getDefaultState(this.props);
+      this.setState(resetState);
+    }
+
 
     componentDidMount() {
       const _leaf = this.leaf;
@@ -382,29 +414,6 @@ export function leafWrapper(Comp: types.IBaseRenderComponent, {
       if (leaf.parent) {
         this.getRenderUnitInfo(leaf.parent);
       }
-    }
-
-    componentWillReceiveProps(nextProps: any) {
-      let { componentId } = nextProps;
-      if (nextProps.__tag === this.props.__tag) {
-        return null;
-      }
-
-      const _leaf = getNode?.(componentId);
-      if (_leaf && this.curEventLeaf && _leaf !== this.curEventLeaf) {
-        this.disposeFunctions.forEach((fn) => fn());
-        this.disposeFunctions = [];
-        this.initOnChildrenChangeEvent(_leaf);
-        this.initOnPropsChangeEvent(_leaf);
-        this.initOnVisibleChangeEvent(_leaf);
-        this.curEventLeaf = _leaf;
-      }
-
-      const {
-        visible,
-        ...resetState
-      } = this.getDefaultState(nextProps);
-      this.setState(resetState);
     }
 
     /** 监听参数变化 */

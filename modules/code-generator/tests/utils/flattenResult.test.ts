@@ -23,6 +23,7 @@ test('utils/flattenResult', () => {
                   ],
                 },
               ],
+
               files: [
                 {
                   name: 'index',
@@ -32,26 +33,28 @@ test('utils/flattenResult', () => {
               ],
             },
           ],
+
           files: [{ name: 'index', ext: 'js', content: 'console.log("Hello")' }],
         },
       ],
+
       files: [{ name: '.eslintrc', ext: '', content: '{}' }],
     }),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "content": "{}",
         "pathName": ".eslintrc",
       },
-      Object {
-        "content": "console.log(\\"Hello\\")",
+      {
+        "content": "console.log("Hello")",
         "pathName": "src/index.js",
       },
-      Object {
-        "content": "export * from \\"./Hello\\";",
+      {
+        "content": "export * from "./Hello";",
         "pathName": "src/components/index.js",
       },
-      Object {
+      {
         "content": "export default () => <div>Hello</div>",
         "pathName": "src/components/Hello/index.js",
       },

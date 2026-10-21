@@ -182,7 +182,8 @@ export function jsonp(dataAPI: any, params = {}, otherProps = {}) {
     const url = buildUrl(dataAPI, params);
     fetchJsonp(url, processedOtherProps)
       .then((response) => {
-        response.json();
+        // 必须 return，否则下一个 then 拿到的是 undefined（原来这里漏了 return，属于既有 bug）
+        return response.json();
       })
       .then((json) => {
         if (json) {

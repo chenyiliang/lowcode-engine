@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 /* eslint-disable no-param-reassign */
 import { createElement } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import {
   globalContext,
   Editor,
@@ -209,7 +209,27 @@ engineConfig.set('isOpenSource', isOpenSource);
 
 // container which will host LowCodeEngine DOM
 let engineContainer: HTMLElement;
-// @ts-ignore webpack Define variable
+// React 19 用 createRoot 取代 ReactDOM.render，需要持有 root 以便卸载
+let engineRoot: Root | null = null;
+// root 绑定的容器：容器变化时必须重建 root（createRoot 不能复用给另一个节点）
+let engineRootContainer: HTMLElement | null = null;
+
+/** 取（或惰性创建）当前容器对应的 React 19 root */
+function getEngineRoot(container: HTMLElement): Root {
+  if (!engineRoot || engineRootContainer !== container) {
+    // 容器换了：先把旧 root 卸载掉再建新 root
+    if (engineRoot) {
+      engineRoot.unmount();
+      engineRoot = null;
+    }
+    engineRoot = createRoot(container);
+    engineRootContainer = container;
+  }
+  return engineRoot;
+}
+
+// 版本号在构建期由 vite 的 define 注入（见 packages/engine/vite.config.ts）
+declare const VERSION_PLACEHOLDER: string;
 export const version = VERSION_PLACEHOLDER;
 engineConfig.set('ENGINE_VERSION', version);
 
@@ -242,14 +262,13 @@ export async function init(
   if (options && options.enableWorkspaceMode) {
     const disposeFun = await pluginPromise;
     disposeFun && disposeFun();
-    render(
+    getEngineRoot(engineContainer).render(
       createElement(WorkSpaceWorkbench, {
         workspace: innerWorkspace,
         // skeleton: workspace.skeleton,
         className: 'engine-main',
         topAreaItemClassName: 'engine-actionitem',
       }),
-      engineContainer,
     );
     innerWorkspace.enableAutoOpenFirstWindow = engineConfig.get('enableAutoOpenFirstWindow', true);
     innerWorkspace.setActive(true);
@@ -261,13 +280,12 @@ export async function init(
 
   await plugins.init(pluginPreference as any);
 
-  render(
+  getEngineRoot(engineContainer).render(
     createElement(Workbench, {
       skeleton: innerSkeleton,
       className: 'engine-main',
       topAreaItemClassName: 'engine-actionitem',
     }),
-    engineContainer,
   );
 }
 
@@ -280,7 +298,11 @@ export async function destroy() {
 
   // TODO: delete plugins except for core plugins
 
-  // unmount DOM container, this will trigger React componentWillUnmount lifeCycle,
-  // so necessary cleanups will be done.
-  engineContainer && unmountComponentAtNode(engineContainer);
+  // 卸载 React root（等价于旧的 unmountComponentAtNode），
+  // 这会触发 React componentWillUnmount 生命周期，从而完成必要的清理。
+  if (engineRoot) {
+    engineRoot.unmount();
+    engineRoot = null;
+    engineRootContainer = null;
+  }
 }

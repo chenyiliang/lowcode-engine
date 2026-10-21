@@ -40,7 +40,7 @@ export interface IPublicApiCommonUI {
   /**
    * HelpTip 组件
    */
-  get HelpTip(): React.VFC<{
+  get HelpTip(): React.FC<{
     help: IPublicTypeHelpTipConfig;
 
     /**

@@ -84,6 +84,8 @@ export default class PopupService extends Component<{
   actionKey?: string;
   safeId?: string;
   popupContainer?: string;
+  // React 19：Component 不再隐式带 children，需显式声明
+  children?: ReactNode;
 }> {
   private popupPipe = this.props.popupPipe || new PopupPipe();
 
@@ -153,7 +155,7 @@ export class PopupContent extends PureComponent<{ safeId?: string; popupContaine
   };
 
   render() {
-    const { content, visible, title, actionKey, pos, offsetX, width = 360, hasMask = false, canCloseByOutSideClick = true, safeNode = [] } = this.state;
+    const { content, visible, title, actionKey, pos, offsetX = -300, width = 360, hasMask = false, canCloseByOutSideClick = true, safeNode = [] } = this.state;
     if (!visible) {
       return null;
     }
@@ -171,7 +173,7 @@ export class PopupContent extends PureComponent<{ safeId?: string; popupContaine
         visible={visible}
         offset={[offsetX, 0]}
         hasMask={hasMask}
-        onVisibleChange={(_visible, type) => {
+        onVisibleChange={(_visible: boolean, type: string) => {
           if (avoidLaterHidden) {
             return;
           }

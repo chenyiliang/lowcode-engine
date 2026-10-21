@@ -23,6 +23,10 @@ export class DesignerView extends Component<IProps> {
     } else {
       this.designer = new Designer(designerProps);
     }
+    // React 19 移除了 UNSAFE_componentWillMount。
+    // 原本挂载前调用 this.designer.purge() 做一次性清理，改到构造函数里执行
+    // （同样在首次 render / mount 之前运行一次，语义等价）。
+    this.designer.purge();
   }
 
   shouldComponentUpdate(nextProps: DesignerProps) {
@@ -44,10 +48,6 @@ export class DesignerView extends Component<IProps> {
       onMount(this.designer);
     }
     this.designer.postEvent('mount', this.designer);
-  }
-
-  UNSAFE_componentWillMount() {
-    this.designer.purge();
   }
 
   render() {

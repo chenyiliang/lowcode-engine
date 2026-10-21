@@ -1,4 +1,4 @@
-import { createElement, ReactNode } from 'react';
+import { createElement, ReactNode, ReactElement, ComponentType } from 'react';
 import { obx, computed, makeObservable, IEventBus, createModuleEventBus } from '@alilc/lowcode-editor-core';
 import { uniqueId, createContent } from '@alilc/lowcode-utils';
 import { IPublicTypeHelpTipConfig, IPublicTypePanelConfig, IPublicTypeTitleContent } from '@alilc/lowcode-types';
@@ -49,7 +49,10 @@ export class Panel implements IWidget {
     }
 
     const { content, contentProps } = this.config;
-    return createContent(content, {
+    // content 为数组的情况在构造函数里已建成 container，上面提前 return 了，
+    // 走到这里 content 只会是 string / ReactElement / ComponentType / undefined，
+    // 正好是 createContent 接受的形态。
+    return createContent(content as ReactElement | ComponentType<any> | string | undefined, {
       ...contentProps,
       editor: getEvent(this.skeleton.editor),
       config: this.config,
@@ -108,8 +111,8 @@ export class Panel implements IWidget {
       props.onInit.call(this, this);
     }
 
-    if (typeof content !== 'string' && content && content.onInit) {
-      content.onInit.call(this, this);
+    if (typeof content !== 'string' && content && !Array.isArray(content) && (content as { onInit?: (widget: any) => any }).onInit) {
+      (content as { onInit?: (widget: any) => any }).onInit!.call(this, this);
     }
     // todo: process shortcut
   }

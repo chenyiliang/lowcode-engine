@@ -1,5 +1,5 @@
 import { obx, computed, makeObservable } from '@alilc/lowcode-editor-core';
-import { uniqueId } from '@alilc/lowcode-utils';
+import { uniqueId, findDOMNode } from '@alilc/lowcode-utils';
 import { createElement, ReactNode, ReactInstance } from 'react';
 import { ISkeleton } from '../skeleton';
 import { PanelDockConfig } from '../types';
@@ -7,7 +7,6 @@ import { Panel } from './panel';
 import { PanelDockView, WidgetView } from '../components/widget-views';
 import { IWidget } from './widget';
 import { composeTitle } from './utils';
-import { findDOMNode } from 'react-dom';
 
 export class PanelDock implements IWidget {
   readonly isWidget = true;
